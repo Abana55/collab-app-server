@@ -1,28 +1,40 @@
+require('dotenv').config();
 const express = require('express');
 const mysql = require('mysql2');
-const bodyParser = require('body-parser');
 const cors = require('cors');
+const winston = require('winston');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+
+// Logger setup
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  transports: [
+    new winston.transports.Console({ format: winston.format.simple() }),
+  ],
+});
 
 // Middleware
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
 // MySQL connection
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'your_mysql_username',
-  password: 'your_mysql_password',
-  database: 'collaboration_app',
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_DATABASE,
 });
 
-db.connect((err) => {
+// Verify database connection
+db.getConnection((err, connection) => {
   if (err) {
-    console.error('MySQL connection error:', err);
+    logger.error('MySQL connection error:', err);
+    process.exit(1); // Exit if cannot connect to database
   } else {
-    console.log('Connected to MySQL');
+    logger.info('Connected to MySQL');
+    connection.release();
   }
 });
 
@@ -32,6 +44,7 @@ app.get('/', (req, res) => {
 });
 
 // Start the server
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  logger.info(`Server is running on http://localhost:${PORT}`);
 });
