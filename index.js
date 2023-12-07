@@ -42,6 +42,12 @@ db.getConnection((err, connection) => {
 app.get('/', (req, res) => {
   res.send('Welcome to the Collaboration App API');
 });
+const userRoutes = require('./routes/users');
+// Other route imports...
+
+// Use routes
+app.use('/api/users', userRoutes);
+// Other app.use() for different routes...
 
 // Start the server
 const PORT = process.env.PORT || 5000;
