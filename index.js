@@ -3,20 +3,26 @@ const express = require('express');
 const cors = require('cors');
 const winston = require('winston');
 
-// Import routes
-const userRoutes = require('./routes/users');
-// Add more route imports as needed
-
+const express = require('express');
 const app = express();
 
-// Logger setup
-const logger = winston.createLogger({
-  level: 'info',
-  format: winston.format.json(),
-  transports: [
-    new winston.transports.Console({ format: winston.format.simple() }),
-  ],
-});
+// Import routes
+const userRoutes = require('./routes/users');
+const projectRoutes = require('./routes/projects');
+const collaborationRoutes = require('./routes/collaborations');
+const messageRoutes = require('./routes/messages');
+const artworkRoutes = require('./routes/artworks');
+const transactionRoutes = require('./routes/transactions');
+
+// Use routes
+app.use('/api/users', userRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/collaborations', collaborationRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/artworks', artworkRoutes);
+app.use('/api/transactions', transactionRoutes);
+
+// Other setup like database, middleware, etc.
 
 // Middleware
 app.use(cors());
