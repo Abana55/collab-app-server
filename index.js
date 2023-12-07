@@ -1,8 +1,11 @@
 require('dotenv').config();
 const express = require('express');
-const mysql = require('mysql2');
 const cors = require('cors');
 const winston = require('winston');
+
+// Import routes
+const userRoutes = require('./routes/users');
+// Add more route imports as needed
 
 const app = express();
 
@@ -19,13 +22,8 @@ const logger = winston.createLogger({
 app.use(cors());
 app.use(express.json());
 
-// MySQL connection
-const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_DATABASE,
-});
+// Database setup (assuming you have a separate module for this)
+const db = require('./utils/database');
 
 // Verify database connection
 db.getConnection((err, connection) => {
@@ -38,16 +36,14 @@ db.getConnection((err, connection) => {
   }
 });
 
-// Routes
+// API Routes
+app.use('/api/users', userRoutes); // User routes
+// Add more routes here, e.g., app.use('/api/projects', projectRoutes);
+
+// Welcome route
 app.get('/', (req, res) => {
   res.send('Welcome to the Collaboration App API');
 });
-const userRoutes = require('./routes/users');
-// Other route imports...
-
-// Use routes
-app.use('/api/users', userRoutes);
-// Other app.use() for different routes...
 
 // Start the server
 const PORT = process.env.PORT || 5000;
