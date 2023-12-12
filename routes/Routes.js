@@ -1,3 +1,5 @@
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' }); // saves files to 'uploads' directory
 
 // Get all projects
 app.get('/projects', (req, res) => {
