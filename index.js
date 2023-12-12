@@ -10,6 +10,9 @@ const logger = winston.createLogger({
     // logger configuration
 });
 
+const uploadRoutes = require('./routes/uploadRoutes');
+app.use(uploadRoutes);
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -29,6 +32,7 @@ app.use('/api/collaborations', collaborationRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/artworks', artworkRoutes);
 app.use('/api/transactions', transactionRoutes);
+app.use('/uploads', express.static('uploads'));
 
 // Database setup (assuming you have a separate module for this)
 const db = require('./utils/database');
