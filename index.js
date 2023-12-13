@@ -1,41 +1,66 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const multer = require('multer');
+const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 const winston = require('winston');
 
+// Initialize express app
 const app = express();
 
-// Logger setup (Ensure this is correctly configured)
+// Logger setup with winston
+
 const logger = winston.createLogger({
-    // logger configuration
+    level: 'info', // Lowest level of logs to capture (error, warn, info, verbose, debug, silly)
+    format: winston.format.combine(
+        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+        winston.format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
+    ),
+    transports: [
+        // Console transport
+        new winston.transports.Console({
+            format: winston.format.combine(
+                winston.format.colorize(),
+                winston.format.simple()
+            )
+        }),
+        // File transport
+        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.File({ filename: 'combined.log' })
+    ]
 });
 
-const uploadRoutes = require('./routes/uploadRoutes');
-app.use(uploadRoutes);
 
-// Middleware
+// Multer for file uploads (if needed)
+const upload = multer({ dest: 'uploads/' }); // Configure as needed
+
+// CORS middleware
 app.use(cors());
+
+// Helmet for basic security
+app.use(helmet());
+
+// Morgan for HTTP request logging
+app.use(morgan('dev'));
+
+// Rate limiting middleware
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
+
+// Body parsing middleware
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Import routes
-const userRoutes = require('./routes/users');
-const projectRoutes = require('./routes/projects');
-const collaborationRoutes = require('./routes/collaborations');
-const messageRoutes = require('./routes/messages');
-const artworkRoutes = require('./routes/artworks');
-const transactionRoutes = require('./routes/transactions');
-
-// Use routes
-app.use('/api/users', userRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/collaborations', collaborationRoutes);
-app.use('/api/messages', messageRoutes);
-app.use('/api/artworks', artworkRoutes);
-app.use('/api/transactions', transactionRoutes);
+// Serve static files from 'uploads' directory
 app.use('/uploads', express.static('uploads'));
 
-// Database setup (assuming you have a separate module for this)
-const db = require('./utils/database');
+// Database setup (if you have a separate database module)
+const db = require('./utils/database'); // Update the path as per your project structure
 
 // Verify database connection
 db.getConnection((err, connection) => {
@@ -48,13 +73,36 @@ db.getConnection((err, connection) => {
     }
 });
 
+// Route handlers
+const userRoutes = require('./routes/users');
+const projectRoutes = require('./routes/projects');
+const collaborationRoutes = require('./routes/collaborations');
+const messageRoutes = require('./routes/messages');
+const artworkRoutes = require('./routes/artworks');
+const transactionRoutes = require('./routes/transactions');
+// other route imports...
+
+app.use('/api/users', userRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/collaborations', collaborationRoutes);
+app.use('/api/messages', messageRoutes);
+app.use('/api/artworks', artworkRoutes);
+app.use('/api/transactions', transactionRoutes);
+// other route uses...
+
 // Welcome route
 app.get('/', (req, res) => {
     res.send('Welcome to the Collaboration App API');
 });
 
+// Global error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-    logger.info(`Server is running on http://localhost:${PORT}`);
+    logger.info(`Server running on port ${PORT}`);
 });
