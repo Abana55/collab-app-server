@@ -60,7 +60,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
 
 // Database setup (if you have a separate database module)
-const db = require('./utils/database'); // Update the path as per your project structure
+const db = require('./database/database');
 
 // Verify database connection
 db.getConnection((err, connection) => {
@@ -102,7 +102,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000; // Change 5000 to another number
 app.listen(PORT, () => {
-    logger.info(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
