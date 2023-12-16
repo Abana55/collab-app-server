@@ -1,6 +1,8 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { generateToken } = require('./jwtUtils');
+
 
 const AuthController = {
     // User registration
@@ -43,6 +45,7 @@ const AuthController = {
                 process.env.JWT_SECRET, // Ensure you have a JWT_SECRET in your .env file
                 { expiresIn: '1h' }
             );
+            
 
             res.json({ token, userId: user.id });
         } catch (error) {

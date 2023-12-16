@@ -1,9 +1,21 @@
-const express = require('express');
-const router = express.Router();
-const authMiddleware = require('./middleware/authMiddleware');
+const jwt = require('jsonwebtoken');
 
-router.get('/protected', authMiddleware, (req, res) => {
-    res.json({ message: `Welcome user ${req.user.id}` });
-});
+const authMiddleware = (req, res, next) => {
+    // Extract token from the Authorization header
+    const token = req.header('Authorization')?.split(' ')[1];
 
-module.exports = router;
+    if (!token) {
+        return res.status(401).json({ message: 'No token, authorization denied' });
+    }
+
+    try {
+        // Verify token
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        next();
+    } catch (e) {
+        res.status(400).json({ message: 'Token is not valid' });
+    }
+};
+
+module.exports = authMiddleware;

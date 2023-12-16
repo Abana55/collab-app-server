@@ -81,6 +81,7 @@ const messageRoutes = require('./routes/messages');
 const artworkRoutes = require('./routes/artworks');
 const transactionRoutes = require('./routes/transactions');
 const authRoutes = require('./routes/authRoutes'); 
+const protectedRoutes = require('./routes/protectedRoutes');
 
 app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
@@ -89,6 +90,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/artworks', artworkRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api', protectedRoutes);
 
 // Welcome route
 app.get('/', (req, res) => {
