@@ -1,4 +1,4 @@
-const db = require('../database/database');
+const db = require('../config/database');
 
 exports.getAllProjects = async (req, res) => {
     try {

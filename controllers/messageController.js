@@ -1,4 +1,4 @@
-const db = require('../database/database');
+const db = require('../config/database');
 
 exports.getAllMessages = async (req, res) => {
     try {

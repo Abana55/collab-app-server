@@ -1,4 +1,4 @@
-const db = require('../database/database');
+const db = require('../config/database');
 
 exports.getAllArtworks = async (req, res) => {
     try {

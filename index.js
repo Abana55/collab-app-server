@@ -60,7 +60,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static('uploads'));
 
 // Database setup (if you have a separate database module)
-const db = require('./database/database');
+const db = require('./config/database');
 
 // Verify database connection
 db.getConnection((err, connection) => {
