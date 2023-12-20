@@ -1,5 +1,5 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database'); // Adjust the path to your Sequelize config
+const sequelize = require('../config/database'); // Adjust the path as necessary
 
 class Collaboration extends Model {}
 

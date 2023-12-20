@@ -1,12 +1,11 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database'); // Adjust the path to your Sequelize config
+const sequelize = require('../config/database'); // Adjust the path as necessary
 
 class User extends Model {}
 
 User.init({
-    // Define attributes
     username: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(50), // Specify length
         allowNull: false,
         unique: true
     },
@@ -23,9 +22,11 @@ User.init({
         allowNull: false
     }
 }, {
-    // Model options
     sequelize,
-    modelName: 'User'
+    modelName: 'User',
+    timestamps: true, // Enable timestamps
+    createdAt: 'created_at', // Map createdAt to created_at column
+    updatedAt: 'updated_at' // Map updatedAt to updated_at column
 });
 
 module.exports = User;

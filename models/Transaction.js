@@ -1,10 +1,9 @@
 const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../config/database'); // Adjust the path to your Sequelize config
+const sequelize = require('../config/database'); // Adjust the path as necessary
 
 class Transaction extends Model {}
 
 Transaction.init({
-    // Define attributes
     amount: {
         type: DataTypes.DECIMAL(10, 2), // Adjust precision and scale as needed
         allowNull: false
@@ -19,7 +18,7 @@ Transaction.init({
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'Users', // Assuming you have a User model
+            model: 'Users', 
             key: 'id',
         }
     },

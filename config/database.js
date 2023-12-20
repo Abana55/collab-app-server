@@ -1,16 +1,17 @@
-const mysql = require('mysql2');
+const { Sequelize } = require('sequelize');
 
-// Ensure your environment variables are loaded
 require('dotenv').config();
 
-const pool = mysql.createPool({
+// Create a Sequelize instance
+const sequelize = new Sequelize(process.env.DB_DATABASE, process.env.DB_USER, process.env.DB_PASSWORD, {
     host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
+    dialect: 'mysql', // Specify the dialect
+    pool: {
+        max: 10, // Use the same limit as your original pool
+        min: 0,
+        acquire: 30000,
+        idle: 10000
+    }
 });
 
-module.exports = pool.promise();
+module.exports = sequelize;
