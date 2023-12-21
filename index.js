@@ -62,16 +62,17 @@ app.use('/uploads', express.static('uploads'));
 // Database setup (if you have a separate database module)
 const db = require('./config/database');
 
-// Verify database connection
-db.getConnection((err, connection) => {
-    if (err) {
-        logger.error('MySQL connection error:', err);
+// Sequelize setup
+const sequelize = require('./config/database'); // Adjust path as needed
+
+sequelize.authenticate()
+    .then(() => {
+        logger.info('Connection has been established successfully.');
+    })
+    .catch(err => {
+        logger.error('Unable to connect to the database:', err);
         process.exit(1); // Exit if cannot connect to database
-    } else {
-        logger.info('Connected to MySQL');
-        connection.release();
-    }
-});
+    });
 
 // Route handlers
 const userRoutes = require('./routes/users');
