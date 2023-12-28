@@ -32,22 +32,33 @@ const AuthController = {
         try {
             const user = await User.findOne({ where: { email: req.body.email } });
             if (!user) {
-                return res.status(400).json({ message: 'User not found' });
+                return res.status(400).json({ message: 'Invalid email or password' });
             }
-    
+
             const isMatch = await bcrypt.compare(req.body.password, user.password);
             if (!isMatch) {
-                return res.status(400).json({ message: 'Invalid credentials' });
+                return res.status(400).json({ message: 'Invalid email or password' });
             }
-    
-            const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+
+            const token = jwt.sign(
+                { userId: user.id }, 
+                process.env.JWT_SECRET, 
+                { expiresIn: '3h' }
+            );
+
             res.json({ token, userId: user.id });
         } catch (error) {
-            console.error(error); // Log the detailed error
-            if (error instanceof SomeSpecificError) { // Replace with specific error types if known
-                res.status(/* appropriate status code */).json({ message: /* specific error message */ });
+            console.error(error); // Log the detailed error for debugging
+
+            // Handle specific errors
+            if (error instanceof Sequelize.DatabaseError) {
+                return res.status(500).json({ message: 'Database error occurred' });
+            } else if (error instanceof jwt.JsonWebTokenError) {
+                return res.status(500).json({ message: 'Error generating token' });
+            } else if (error instanceof bcrypt.BcryptError) {
+                return res.status(500).json({ message: 'Password encryption error' });
             } else {
-                res.status(500).json({ message: 'An internal server error occurred' });
+                return res.status(500).json({ message: 'An internal server error occurred' });
             }
         }
     }
