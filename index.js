@@ -83,6 +83,8 @@ const artworkRoutes = require('./routes/artworks');
 const transactionRoutes = require('./routes/transactions');
 const authRoutes = require('./routes/authRoutes'); 
 const protectedRoutes = require('./routes/protectedRoutes');
+router.post('/register', authController.register);
+router.post('/login', authController.login);
 
 app.use('/api/users', userRoutes);
 app.use('/api/projects', projectRoutes);
@@ -109,3 +111,6 @@ const PORT = process.env.PORT || 8000; // Change 5000 to another number
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+const authRoutes = require('./routes/authRoutes'); 
+app.use('/api/auth', authRoutes);
