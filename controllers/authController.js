@@ -1,65 +1,39 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
-const { generateToken } = require('../utils/jwtUtils');
-const Sequelize = require('sequelize'); // Import Sequelize to access error types
-
-
+const knex = require('../database/knex'); // path to your Knex configuration
 
 const AuthController = {
     async register(req, res) {
         try {
             const hashedPassword = await bcrypt.hash(req.body.password, 10);
-            const user = await User.create({
+            const user = await knex('users').insert({
                 username: req.body.username,
                 email: req.body.email,
                 password: hashedPassword
-            });
-    
-            res.status(201).json({ message: 'User created successfully', userId: user.id });
+            }).returning('*'); // Modify as per your DB's returning data
+
+            res.status(201).json({ message: 'User created successfully', user });
         } catch (error) {
-            if (error.name === 'SequelizeUniqueConstraintError') {
-                res.status(400).json({ message: 'Email already in use' });
-            } else {
-                console.error(error); // Log the detailed error
-                res.status(500).json({ message: 'An error occurred' });
-            }
+            res.status(500).json({ error: error.message });
         }
     },
 
-    // User login
     async login(req, res) {
         try {
-            const user = await User.findOne({ where: { email: req.body.email } });
+            const user = await knex('users').where({ email: req.body.email }).first();
             if (!user) {
-                return res.status(400).json({ message: 'Invalid email or password' });
+                return res.status(400).json({ message: 'User not found' });
             }
 
             const isMatch = await bcrypt.compare(req.body.password, user.password);
             if (!isMatch) {
-                return res.status(400).json({ message: 'Invalid email or password' });
+                return res.status(400).json({ message: 'Invalid credentials' });
             }
 
-            const token = jwt.sign(
-                { userId: user.id }, 
-                process.env.JWT_SECRET, 
-                { expiresIn: '3h' }
-            );
-
+            const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
             res.json({ token, userId: user.id });
         } catch (error) {
-            console.error(error); // Log the detailed error for debugging
-
-            // Handle specific errors
-            if (error instanceof Sequelize.DatabaseError) {
-                return res.status(500).json({ message: 'Database error occurred' });
-            } else if (error instanceof jwt.JsonWebTokenError) {
-                return res.status(500).json({ message: 'Error generating token' });
-            } else if (error instanceof bcrypt.BcryptError) {
-                return res.status(500).json({ message: 'Password encryption error' });
-            } else {
-                return res.status(500).json({ message: 'An internal server error occurred' });
-            }
+            res.status(500).json({ error: error.message });
         }
     }
 };
